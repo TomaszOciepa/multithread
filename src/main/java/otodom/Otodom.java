@@ -1,16 +1,16 @@
 package otodom;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Otodom {
 
+public class Otodom {
+        // 37739 s
     public static void main(String[] args) throws Exception {
+
+        long start = System.currentTimeMillis();
 
         URL otodom = new URL("https://www.otodom.pl/sprzedaz/mieszkanie/sopot/");
         BufferedReader in = new BufferedReader(
@@ -24,8 +24,8 @@ public class Otodom {
         }
 
         in.close();
-        Set<String> links = new TreeSet<>();
         String content = stringBuilder.toString();
+        Set<String> strings = new TreeSet<>();
 
         for (int i = 0; i < content.length(); i++) {
             i = content.indexOf("https://www.otodom.pl/oferta/", i);
@@ -35,9 +35,35 @@ public class Otodom {
             }
             String substring = content.substring(i);
             String link = substring.split(".html")[0];
-            links.add(link);
+            strings.add(link);
         }
-        links.forEach(System.out::println);
-        System.out.println(links.size());
+
+        for (int i = 0; i < strings.size(); i++) {
+            readWebsite(strings.toArray()[i].toString(), i+".html");
+        }
+
+
+        long end = System.currentTimeMillis();
+
+        System.out.println(end - start);
+    }
+
+    public static void readWebsite(String link, String fileName) throws IOException {
+        URL otodom = new URL(link);
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(otodom.openStream()));
+
+        String inputLine;
+        StringBuilder stringBuilder = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            stringBuilder.append(inputLine);
+            stringBuilder.append(System.lineSeparator());
+        }
+
+        in.close();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, false));
+        bw.write(stringBuilder.toString());
+        bw.close();
     }
 }
