@@ -4,11 +4,17 @@ import java.io.*;
 import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Otodom {
-        // 37739 s
+        // 37739s one thread
+    // 3061s 30 thread
+
     public static void main(String[] args) throws Exception {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(30);
 
         long start = System.currentTimeMillis();
 
@@ -28,6 +34,7 @@ public class Otodom {
         Set<String> strings = new TreeSet<>();
 
         for (int i = 0; i < content.length(); i++) {
+
             i = content.indexOf("https://www.otodom.pl/oferta/", i);
 
             if(i < 0){
@@ -39,9 +46,17 @@ public class Otodom {
         }
 
         for (int i = 0; i < strings.size(); i++) {
-            readWebsite(strings.toArray()[i].toString(), i+".html");
+            int finalI = i;
+            executorService.submit(()-> {
+                try {
+                    readWebsite(strings.toArray()[finalI].toString(), finalI + ".html");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
+        executorService.shutdown();
 
         long end = System.currentTimeMillis();
 
